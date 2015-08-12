@@ -12,7 +12,7 @@ import java.sql.Statement;
 import java.util.StringTokenizer;
 
 /**
- * This module implements a RESTful service for the person table of the monopoly database.
+ * This module implements a Restful service for the person table of the monopoly database.
  *
  * I tested these services using IDEA's REST Client test tool. Run the server in debug mode and open
  * Tools-TestRESTService and set the appropriate HTTP method, host/port, path and request body and then press
@@ -27,6 +27,7 @@ public class MonopolyResource {
     /**
      * @return a simple hello-world string
      */
+    @SuppressWarnings("SameReturnValue")
     @GET
     @Path("/hello")
     @Produces("text/plain")
@@ -35,11 +36,11 @@ public class MonopolyResource {
     }
 
     /**
-     * Constants for a local PostgreSQL server with the monopoly database
+     * Constants for a local Postgresql server with the monopoly database
      */
-    private static String DB_URI = "jdbc:postgresql://localhost:5432/monopoly";
-    private static String DB_LOGINID = "postgres";
-    private static String DB_PASSWORD = "bjarne";
+    private static final String DB_URI = "jdbc:postgresql://localhost:5432/monopoly";
+    private static final String DB_LOGIN_ID = "postgres";
+    private static final String DB_PASSWORD = "bjarne";
 
     /**
      * @param id a player id in the monopoly database
@@ -49,10 +50,10 @@ public class MonopolyResource {
     @Path("/player/{id}")
     @Produces("text/plain")
     public String getPlayer(@PathParam("id") int id) {
-        String result = "";
+        String result;
         try {
             Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGINID, DB_PASSWORD);
+            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM Player WHERE id=" + id);
             if (resultSet.next()) {
@@ -64,7 +65,7 @@ public class MonopolyResource {
             statement.close();
             connection.close();
         } catch (Exception e) {
-            result = e.getMessage().toString();
+            result = e.getMessage();
         }
         return result;
     }
@@ -79,7 +80,7 @@ public class MonopolyResource {
         String result = "";
         try {
             Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGINID, DB_PASSWORD);
+            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM Player");
             while (resultSet.next()) {
@@ -89,7 +90,7 @@ public class MonopolyResource {
             statement.close();
             connection.close();
         } catch (Exception e) {
-            result = e.getMessage().toString();
+            result = e.getMessage();
         }
         return result;
     }
@@ -101,7 +102,7 @@ public class MonopolyResource {
      * times does not change the database.
      *
      * @param id the ID for the new player, assumed to be unique
-     * @param playerLine a string representation of the player in the format: emailaddress name
+     * @param playerLine a string representation of the player in the format: emailAddress name
      * @return status message
      */
     @PUT
@@ -109,26 +110,26 @@ public class MonopolyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
     public String putPlayer(@PathParam("id") int id, String playerLine) {
-        String result = "";
+        String result;
         StringTokenizer st = new StringTokenizer(playerLine);
-        String emailaddress = st.nextToken(), name = st.nextToken();
+        String emailAddress = st.nextToken(), name = st.nextToken();
         try {
             Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGINID, DB_PASSWORD);
+            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM Player WHERE id=" + id);
             if (resultSet.next()) {
-                statement.executeUpdate("UPDATE Player SET emailaddress='" + emailaddress + "' name='" + name + "' WHERE id=" + id);
+                statement.executeUpdate("UPDATE Player SET emailaddress='" + emailAddress + "' name='" + name + "' WHERE id=" + id);
                 result = "Player " + id + " updated...";
             } else {
-                statement.executeUpdate("INSERT INTO Player VALUES (" + id + ", '" + emailaddress + "', '" + name + "')");
+                statement.executeUpdate("INSERT INTO Player VALUES (" + id + ", '" + emailAddress + "', '" + name + "')");
                 result = "Player " + id + " added...";
             }
             resultSet.close();
             statement.close();
             connection.close();
         } catch (Exception e) {
-            result = e.getMessage().toString();
+            result = e.getMessage();
         }
         return result;
     }
@@ -142,7 +143,7 @@ public class MonopolyResource {
      * The method creates a new, unique ID by querying the player table for the
      * largest ID and adding 1 to that. Using a sequence would be a better solution.
      *
-     * @param playerLine a string representation of the player in the format: emailaddress name
+     * @param playerLine a string representation of the player in the format: emailAddress name
      * @return status message
      */
     @POST
@@ -150,25 +151,25 @@ public class MonopolyResource {
     @Consumes("text/plain")
     @Produces("text/plain")
     public String postPlayer(String playerLine) {
-        String result = "";
+        String result;
         StringTokenizer st = new StringTokenizer(playerLine);
         int id = -1;
-        String emailaddress = st.nextToken(), name = st.nextToken();
+        String emailAddress = st.nextToken(), name = st.nextToken();
         try {
             Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGINID, DB_PASSWORD);
+            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT MAX(ID) FROM Player");
             if (resultSet.next()) {
                 id = resultSet.getInt(1) + 1;
             }
-            statement.executeUpdate("INSERT INTO Player VALUES (" + id + ", '" + emailaddress + "', '" + name + "')");
+            statement.executeUpdate("INSERT INTO Player VALUES (" + id + ", '" + emailAddress + "', '" + name + "')");
             resultSet.close();
             statement.close();
             connection.close();
             result = "Player " + id + " added...";
         } catch (Exception e) {
-            result = e.getMessage().toString();
+            result = e.getMessage();
         }
         return result;
     }
@@ -179,23 +180,22 @@ public class MonopolyResource {
      * sending the same command multiple times should result in the same side
      * effect, though the return value may be different.
      *
-     * @param id
-     * @return
+     * @param id the ID of the player to be returned
+     * @return a simple text confirmation message
      */
     @DELETE
     @Path("/player/{id}")
     @Produces("text/plain")
     public String deletePlayer(@PathParam("id") int id) {
-        String result = "";
         try {
             Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGINID, DB_PASSWORD);
+            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             Statement statement = connection.createStatement();
             statement.executeUpdate("DELETE FROM Player WHERE id=" + id);
             statement.close();
             connection.close();
         } catch (Exception e) {
-            result = e.getMessage().toString();
+            return e.getMessage();
         }
         return "Player " + id + " deleted...";
     }
@@ -203,7 +203,7 @@ public class MonopolyResource {
     /**
      * Run this main method to fire up the service.
      *
-     * @param args
+     * @param args command-line arguments (ignored)
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
@@ -213,6 +213,7 @@ public class MonopolyResource {
         System.out.println("Server running...");
         System.out.println("Visit: http://localhost:9998/monopoly");
         System.out.println("Hit return to stop...");
+        //noinspection ResultOfMethodCallIgnored
         System.in.read();
         System.out.println("Stopping server...");
         server.stop(0);
