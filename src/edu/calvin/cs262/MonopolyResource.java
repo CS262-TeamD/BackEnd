@@ -101,7 +101,7 @@ public class MonopolyResource {
      * because PUT is idempotent, meaning that running the same PUT several
      * times does not change the database.
      *
-     * @param id the ID for the new player, assumed to be unique
+     * @param id         the ID for the new player, assumed to be unique
      * @param playerLine a string representation of the player in the format: emailAddress name
      * @return status message
      */
@@ -139,7 +139,7 @@ public class MonopolyResource {
      * number. We do this because POST is not idempotent, meaning that running
      * the same POST several times creates multiple objects with unique IDs but
      * with the same values.
-     *
+     * <p/>
      * The method creates a new, unique ID by querying the player table for the
      * largest ID and adding 1 to that. Using a sequence would be a better solution.
      *
