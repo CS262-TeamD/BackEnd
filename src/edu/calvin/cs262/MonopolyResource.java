@@ -1,31 +1,34 @@
 package edu.calvin.cs262;
 
+import com.google.gson.Gson;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 
 import javax.ws.rs.*;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.StringTokenizer;
+import java.sql.*;
+import java.util.*;
 
 /**
- * This module implements a Restful service for the person table of the monopoly database.
- *
- * I tested these services using IDEA's REST Client test tool. Run the server in debug mode and open
+ * This module implements a RESTful service for the player table of the monopoly database.
+ * Only the player relation is supported, not the game or playergame objects.
+ * The server requires Java 1.7 (not 1.8).
+ * <p>
+ * I tested these services using IDEA's REST Client test tool. Run the server and open
  * Tools-TestRESTService and set the appropriate HTTP method, host/port, path and request body and then press
  * the green arrow (submit request).
  *
  * @author kvlinden
- * @version 8/10/2015
+ * @version summer, 2015 - original version
+ * @version summer, 2016 - upgraded to JSON; added Player POJO; removed unneeded libraries
  */
 @Path("/monopoly")
 public class MonopolyResource {
 
     /**
-     * @return a simple hello-world string
+     * a simple hello-world service
+     *
+     * @return a simple string value
      */
     @SuppressWarnings("SameReturnValue")
     @GET
@@ -36,169 +39,257 @@ public class MonopolyResource {
     }
 
     /**
-     * Constants for a local Postgresql server with the monopoly database
-     */
-    private static final String DB_URI = "jdbc:postgresql://localhost:5432/monopoly";
-    private static final String DB_LOGIN_ID = "postgres";
-    private static final String DB_PASSWORD = "bjarne";
-
-    /**
+     * GET method that returns a particular monopoly player based on ID
+     *
      * @param id a player id in the monopoly database
-     * @return a string version of the player record, if any, with the given id
+     * @return a JSON version of the player record, if any, with the given id
      */
     @GET
     @Path("/player/{id}")
-    @Produces("text/plain")
+    @Produces("application/json")
     public String getPlayer(@PathParam("id") int id) {
-        String result;
         try {
-            Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM Player WHERE id=" + id);
-            if (resultSet.next()) {
-                result = resultSet.getInt(1) + " " + resultSet.getString(3) + " " + resultSet.getString(2);
-            } else {
-                result = "nothing found...";
-            }
-            resultSet.close();
-            statement.close();
-            connection.close();
+            return new Gson().toJson(retrievePlayer(id));
         } catch (Exception e) {
-            result = e.getMessage();
+            e.printStackTrace();
         }
-        return result;
+        return null;
     }
 
     /**
-     * @return a string representation of the player records in the Player table
+     * GET method that returns a list of all monopoly players
+     *
+     * @return a JSON list representation of the player records
      */
     @GET
     @Path("/players")
-    @Produces("text/plain")
+    @Produces("application/json")
     public String getPlayers() {
-        String result = "";
         try {
-            Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM Player");
-            while (resultSet.next()) {
-                result += resultSet.getInt(1) + " " + resultSet.getString(3) + " " + resultSet.getString(2) + "\n";
-            }
-            resultSet.close();
-            statement.close();
-            connection.close();
+            return new Gson().toJson(retrievePlayers());
         } catch (Exception e) {
-            result = e.getMessage();
+            e.printStackTrace();
         }
-        return result;
+        return null;
     }
 
     /**
      * PUT method for creating an instance of Person with a given ID - If the
-     * player already exists, replace them with the new player field values. We do this
+     * player already exists, update the fields using the new player field values. We do this
      * because PUT is idempotent, meaning that running the same PUT several
-     * times does not change the database.
+     * times is the same as running it exactly once.
      *
      * @param id         the ID for the new player, assumed to be unique
-     * @param playerLine a string representation of the player in the format: emailAddress name
-     * @return status message
+     * @param playerLine a JSON representation of the player; the id parameter overrides any id in this line.
+     * @return JSON representation of the updated player, or NULL for errors
      */
     @PUT
     @Path("/player/{id}")
-    @Consumes("text/plain")
-    @Produces("text/plain")
+    @Consumes("application/json")
+    @Produces("application/json")
     public String putPlayer(@PathParam("id") int id, String playerLine) {
-        String result;
-        StringTokenizer st = new StringTokenizer(playerLine);
-        String emailAddress = st.nextToken(), name = st.nextToken();
         try {
-            Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM Player WHERE id=" + id);
-            if (resultSet.next()) {
-                statement.executeUpdate("UPDATE Player SET emailaddress='" + emailAddress + "' name='" + name + "' WHERE id=" + id);
-                result = "Player " + id + " updated...";
-            } else {
-                statement.executeUpdate("INSERT INTO Player VALUES (" + id + ", '" + emailAddress + "', '" + name + "')");
-                result = "Player " + id + " added...";
-            }
-            resultSet.close();
-            statement.close();
-            connection.close();
+            Player player = new Gson().fromJson(playerLine, Player.class);
+            player.setId(id);
+            return new Gson().toJson(addOrUpdatePlayer(player));
         } catch (Exception e) {
-            result = e.getMessage();
+            e.printStackTrace();
         }
-        return result;
+        return null;
     }
 
     /**
      * POST method for creating an instance of Person with a new, unique ID
      * number. We do this because POST is not idempotent, meaning that running
      * the same POST several times creates multiple objects with unique IDs but
-     * with the same values.
-     * <p/>
+     * otherwise having the same field values.
+     * <p>
      * The method creates a new, unique ID by querying the player table for the
-     * largest ID and adding 1 to that. Using a sequence would be a better solution.
+     * largest ID and adding 1 to that. Using a DB sequence would be a better solution.
      *
-     * @param playerLine a string representation of the player in the format: emailAddress name
-     * @return status message
+     * @param playerLine a JSON representation of the player (ID ignored)
+     * @return a JSON representation of the new player
      */
     @POST
     @Path("/player")
-    @Consumes("text/plain")
-    @Produces("text/plain")
+    @Consumes("application/json")
+    @Produces("application/json")
     public String postPlayer(String playerLine) {
-        String result;
-        StringTokenizer st = new StringTokenizer(playerLine);
-        int id = -1;
-        String emailAddress = st.nextToken(), name = st.nextToken();
         try {
-            Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT MAX(ID) FROM Player");
-            if (resultSet.next()) {
-                id = resultSet.getInt(1) + 1;
-            }
-            statement.executeUpdate("INSERT INTO Player VALUES (" + id + ", '" + emailAddress + "', '" + name + "')");
-            resultSet.close();
-            statement.close();
-            connection.close();
-            result = "Player " + id + " added...";
+            Player player = new Gson().fromJson(playerLine, Player.class);
+            return new Gson().toJson(addNewPlayer(player));
         } catch (Exception e) {
-            result = e.getMessage();
+            e.printStackTrace();
         }
-        return result;
+        return null;
     }
 
     /**
      * DELETE method for deleting and instance of player with the given ID. If
      * the player doesn't exist, then don't delete anything. DELETE is idempotent, so
-     * sending the same command multiple times should result in the same side
-     * effect, though the return value may be different.
+     * the result of sending the same command multiple times should be the same as
+     * sending it exactly once.
      *
-     * @param id the ID of the player to be returned
-     * @return a simple text confirmation message
+     * @param id the ID of the player to be deleted
+     * @return null
      */
     @DELETE
     @Path("/player/{id}")
-    @Produces("text/plain")
+    @Produces("application/json")
     public String deletePlayer(@PathParam("id") int id) {
         try {
+            deletePlayer(new Player(id, "deleted", "deleted"));
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /** DBMS Utility Functions *********************************************/
+
+    /**
+     * Constants for a local Postgresql server with the monopoly database
+     */
+    private static final String DB_URI = "jdbc:postgresql://localhost:5432/monopoly";
+    private static final String DB_LOGIN_ID = "postgres";
+    private static final String DB_PASSWORD = "bjarne";
+
+    /*
+     * Utility method that does the database query, potentially throwing an SQLException,
+     * returning a name-value map (or null).
+     */
+    private Player retrievePlayer(int id) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
             Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
-            Statement statement = connection.createStatement();
-            statement.executeUpdate("DELETE FROM Player WHERE id=" + id);
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            rs = statement.executeQuery("SELECT * FROM Player WHERE id=" + id);
+            Player player = null;
+            if (rs.next()) {
+                player = new Player(rs.getInt(1), rs.getString(2), rs.getString(3));
+            }
+            return player;
+        } catch (SQLException e) {
+            throw (e);
+        } finally {
+            rs.close();
             statement.close();
             connection.close();
-        } catch (Exception e) {
-            return e.getMessage();
         }
-        return "Player " + id + " deleted...";
     }
+
+    /*
+    * Utility method that does the database query, potentially throwing an SQLException,
+    * returning a list of name-value map objects (potentially empty).
+    */
+    private List<Player> retrievePlayers() throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            rs = statement.executeQuery("SELECT * FROM Player");
+            List<Player> players = new ArrayList<>();
+            while (rs.next()) {
+                players.add(new Player(rs.getInt(1), rs.getString(2), rs.getString(3)));
+            }
+            return players;
+        } catch (SQLException e) {
+            throw (e);
+        } finally {
+            rs.close();
+            statement.close();
+            connection.close();
+        }
+    }
+
+    /*
+    * Utility method that does the database update, potentially throwing an SQLException,
+    * returning the player, potentially new.
+    */
+    private Player addOrUpdatePlayer(Player player) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            rs = statement.executeQuery("SELECT * FROM Player WHERE id=" + player.getId());
+            if (rs.next()) {
+                statement.executeUpdate("UPDATE Player SET emailaddress='" + player.getEmailaddress() + "' name='" + player.getName() + "' WHERE id=" + player.getId());
+            } else {
+                statement.executeUpdate("INSERT INTO Player VALUES (" + player.getId() + ", '" + player.getEmailaddress() + "', '" + player.getName() + "')");
+            }
+            return player;
+        } catch (SQLException e) {
+            throw (e);
+        } finally {
+            rs.close();
+            statement.close();
+            connection.close();
+        }
+    }
+
+    /*
+    * Utility method that adds the given player using a new,unique ID, potentially throwing an SQLException,
+    * returning the new player
+    */
+    private Player addNewPlayer(Player player) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            rs = statement.executeQuery("SELECT MAX(ID) FROM Player");
+            if (rs.next()) {
+                player.setId(rs.getInt(1) + 1);
+            } else {
+                throw new RuntimeException("failed to find unique ID...");
+            }
+            statement.executeUpdate("INSERT INTO Player VALUES (" + player.getId() + ", '" + player.getEmailaddress() + "', '" + player.getName() + "')");
+            return player;
+        } catch (SQLException e) {
+            throw (e);
+        } finally {
+            rs.close();
+            statement.close();
+            connection.close();
+        }
+    }
+
+    /*
+    * Utility method that does the database update, potentially throwing an SQLException,
+    * returning the player, potentially new.
+    */
+    public Player deletePlayer(Player player) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            statement.executeUpdate("DELETE FROM Player WHERE id=" + player.getId());
+            return player;
+        } catch (SQLException e) {
+            throw (e);
+        } finally {
+            rs.close();
+            statement.close();
+            connection.close();
+        }
+    }
+
+    /** Main *****************************************************/
 
     /**
      * Run this main method to fire up the service.
@@ -211,7 +302,8 @@ public class MonopolyResource {
         server.start();
 
         System.out.println("Server running...");
-        System.out.println("Visit: http://localhost:9998/monopoly");
+        System.out.println("Web clients should visit: http://localhost:9998/monopoly");
+        System.out.println("Android emulators should visit: http://LOCAL_IP_ADDRESS:9998/monopoly");
         System.out.println("Hit return to stop...");
         //noinspection ResultOfMethodCallIgnored
         System.in.read();
