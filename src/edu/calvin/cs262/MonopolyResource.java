@@ -26,7 +26,7 @@ import java.util.*;
 public class MonopolyResource {
 
     /**
-     * a simple hello-world service
+     * a hello-world resource
      *
      * @return a simple string value
      */
@@ -80,7 +80,7 @@ public class MonopolyResource {
      * times is the same as running it exactly once.
      *
      * @param id         the ID for the new player, assumed to be unique
-     * @param playerLine a JSON representation of the player; the id parameter overrides any id in this line.
+     * @param playerLine a JSON representation of the player; the id parameter overrides any id in this line
      * @return JSON representation of the updated player, or NULL for errors
      */
     @PUT
@@ -138,8 +138,9 @@ public class MonopolyResource {
     @Produces("application/json")
     public String deletePlayer(@PathParam("id") int id) {
         try {
-            deletePlayer(new Player(id, "deleted", "deleted"));
-            return null;
+            Player x = new Player(id, "deleted", "deleted");
+            Player y = deletePlayer(x);
+            return new Gson().toJson(y);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -163,16 +164,15 @@ public class MonopolyResource {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
+        Player player = null;
         try {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             statement = connection.createStatement();
             rs = statement.executeQuery("SELECT * FROM Player WHERE id=" + id);
-            Player player = null;
             if (rs.next()) {
                 player = new Player(rs.getInt(1), rs.getString(2), rs.getString(3));
             }
-            return player;
         } catch (SQLException e) {
             throw (e);
         } finally {
@@ -180,6 +180,7 @@ public class MonopolyResource {
             statement.close();
             connection.close();
         }
+        return player;
     }
 
     /*
@@ -190,16 +191,15 @@ public class MonopolyResource {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
+        List<Player> players = new ArrayList<>();
         try {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             statement = connection.createStatement();
             rs = statement.executeQuery("SELECT * FROM Player");
-            List<Player> players = new ArrayList<>();
             while (rs.next()) {
                 players.add(new Player(rs.getInt(1), rs.getString(2), rs.getString(3)));
             }
-            return players;
         } catch (SQLException e) {
             throw (e);
         } finally {
@@ -207,6 +207,7 @@ public class MonopolyResource {
             statement.close();
             connection.close();
         }
+        return players;
     }
 
     /*
@@ -223,11 +224,10 @@ public class MonopolyResource {
             statement = connection.createStatement();
             rs = statement.executeQuery("SELECT * FROM Player WHERE id=" + player.getId());
             if (rs.next()) {
-                statement.executeUpdate("UPDATE Player SET emailaddress='" + player.getEmailaddress() + "' name='" + player.getName() + "' WHERE id=" + player.getId());
+                statement.executeUpdate("UPDATE Player SET emailaddress='" + player.getEmailaddress() + "', name='" + player.getName() + "' WHERE id=" + player.getId());
             } else {
                 statement.executeUpdate("INSERT INTO Player VALUES (" + player.getId() + ", '" + player.getEmailaddress() + "', '" + player.getName() + "')");
             }
-            return player;
         } catch (SQLException e) {
             throw (e);
         } finally {
@@ -235,6 +235,7 @@ public class MonopolyResource {
             statement.close();
             connection.close();
         }
+        return player;
     }
 
     /*
@@ -256,7 +257,6 @@ public class MonopolyResource {
                 throw new RuntimeException("failed to find unique ID...");
             }
             statement.executeUpdate("INSERT INTO Player VALUES (" + player.getId() + ", '" + player.getEmailaddress() + "', '" + player.getName() + "')");
-            return player;
         } catch (SQLException e) {
             throw (e);
         } finally {
@@ -264,6 +264,7 @@ public class MonopolyResource {
             statement.close();
             connection.close();
         }
+        return player;
     }
 
     /*
@@ -273,20 +274,18 @@ public class MonopolyResource {
     public Player deletePlayer(Player player) throws Exception {
         Connection connection = null;
         Statement statement = null;
-        ResultSet rs = null;
         try {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             statement = connection.createStatement();
             statement.executeUpdate("DELETE FROM Player WHERE id=" + player.getId());
-            return player;
         } catch (SQLException e) {
             throw (e);
         } finally {
-            rs.close();
             statement.close();
             connection.close();
         }
+        return player;
     }
 
     /** Main *****************************************************/
