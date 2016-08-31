@@ -162,6 +162,7 @@ public class MonopolyResource {
     private static final String DB_URI = "jdbc:postgresql://localhost:5432/monopoly";
     private static final String DB_LOGIN_ID = "postgres";
     private static final String DB_PASSWORD = "bjarne";
+    private static final String PORT = "8089";
 
     /*
      * Utility method that does the database query, potentially throwing an SQLException,
@@ -304,12 +305,12 @@ public class MonopolyResource {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        HttpServer server = HttpServerFactory.create("http://localhost:8089/");
+        HttpServer server = HttpServerFactory.create("http://localhost:" + PORT + "/");
         server.start();
 
         System.out.println("Server running...");
-        System.out.println("Web clients should visit: http://localhost:8089/monopoly");
-        System.out.println("Android emulators should visit: http://LOCAL_IP_ADDRESS:8080/monopoly");
+        System.out.println("Web clients should visit: http://localhost:" + PORT + "/monopoly");
+        System.out.println("Android emulators should visit: http://LOCAL_IP_ADDRESS:" + PORT + "/monopoly");
         System.out.println("Hit return to stop...");
         //noinspection ResultOfMethodCallIgnored
         System.in.read();
