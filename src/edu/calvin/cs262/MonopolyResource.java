@@ -304,12 +304,12 @@ public class MonopolyResource {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        HttpServer server = HttpServerFactory.create("http://localhost:9998/");
+        HttpServer server = HttpServerFactory.create("http://localhost:8080/");
         server.start();
 
         System.out.println("Server running...");
-        System.out.println("Web clients should visit: http://localhost:9998/monopoly");
-        System.out.println("Android emulators should visit: http://LOCAL_IP_ADDRESS:9998/monopoly");
+        System.out.println("Web clients should visit: http://localhost:8080/monopoly");
+        System.out.println("Android emulators should visit: http://LOCAL_IP_ADDRESS:8080/monopoly");
         System.out.println("Hit return to stop...");
         //noinspection ResultOfMethodCallIgnored
         System.in.read();
