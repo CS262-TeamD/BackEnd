@@ -160,7 +160,7 @@ public class MonopolyResource {
      * Constants for a local Postgresql server with the monopoly database
      */
     private static final String DB_URI = "jdbc:postgresql://localhost:5432/monopoly";
-    private static final String DB_LOGIN_ID = "cs262";
+    private static final String DB_LOGIN_ID = "postgres";
     private static final String DB_PASSWORD = "Listen-Anywhere-6";
     private static final String PORT = "8089";
 
