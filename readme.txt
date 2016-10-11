@@ -11,27 +11,10 @@ To start this REST service from the current command line, run these commands at 
 - On Linux
 ./startService.sh
 
-To start this REST service as a system service, use either of these methods.
+To start this REST service as a system service:
+If you look at /var/cs262/Lab09/src/manual2/, I’ve tweaked these startup scripts.
+1.	env.sh – this is a central spot to adjust the project name, and the project base directory.
+2.	start-java.sh – this should be where you have to tweak what java programs are called (which should have the port assigned hard-coded into them.)
+Note: a single user can only run one instance of this startup script with the same Name.  If you make a copy of the scripts and change the name variable in env.sh, then you’ll be able to run a second instance of the script (assuming the code being run is running on another port).
 
-Method 1 – systemctl:
-In /var/cs262/Lab09/src/systemctl/ :
-lab09.service – systemctl service file; it is copied in /lib/systemd/system/ (and ‘init q’ is run to read it in).   This enables systemctl to know what to do for the ‘lab09’ service.  The “startExec” line in here is what launches our server, by firing up screen with the “startService.sh” script.
-startService.sh – your basic start script, modified slightly to correctly change directories on launch and create pid files.
-stopService.sh – a basic stop script.  It reads in the pidfile and kills all child processes of this pid.  Cleans up screen afterwards.
-
-Usage (as your non-privileged user):
-Start:  sudo systemctl start lab09
-Stop:  sudo systemctl stop lab09
-Status:  sudu systemctl status lab09
-
-Method 2 – manual:
-In /var/cs262/Lab09/src/manual/ :
-start.sh – basic shell script that fires up screen with the true start script start-java.sh
-start-java.sh – your basic start script, modified slightly to correctly change directories on launch and create pid files.
-stop.sh – a basic stop script.  It reads in the pidfile and kills all child processes of this pid.  Cleans up screen afterwards.
-
-Usage (as your non-privileged user):
-Start:  ./start.sh
-Stop:  ./stop.sh
-Status:  ps –ef | grep <username> | grep `cat <pidfile>`
 
