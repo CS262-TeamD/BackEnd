@@ -12,9 +12,11 @@ To start this REST service from the current command line, run these commands at 
 ./startService.sh
 
 To start this REST service as a system service:
-If you look at /var/cs262/Lab09/src/manual2/, I’ve tweaked these startup scripts.
-1.	env.sh – this is a central spot to adjust the project name, and the project base directory.
-2.	start-java.sh – this should be where you have to tweak what java programs are called (which should have the port assigned hard-coded into them.)
+See these scripts in /var/cs262/Lab09/src/manual2/
+- env.sh – this is a central spot to adjust the project name, and the project base directory.
+- start-java.sh – this should be where you have to tweak what java programs are called (which should have the port assigned hard-coded into them.)
+- start.sh - This imports env.sh and start-java.sh and starts the service appropriately.
+- stop.sh - This stops the service.
 Note: a single user can only run one instance of this startup script with the same Name.  If you make a copy of the scripts and change the name variable in env.sh, then you’ll be able to run a second instance of the script (assuming the code being run is running on another port).
 
 
