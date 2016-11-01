@@ -161,12 +161,13 @@ public class MonopolyResource {
      */
     private static final String DB_URI = "jdbc:postgresql://localhost:5432/monopoly";
     private static final String DB_LOGIN_ID = "postgres";
-    private static final String DB_PASSWORD = "Listen-Anywhere-6";
+    //private static final String DB_PASSWORD = "Listen-Anywhere-6";
+    private static final String DB_PASSWORD = "bjarne";
     private static final String PORT = "8089";
 
     /*
      * Utility method that does the database query, potentially throwing an SQLException,
-     * returning a name-value map (or null).
+     * returning a player object (or null).
      */
     private Player retrievePlayer(int id) throws Exception {
         Connection connection = null;
