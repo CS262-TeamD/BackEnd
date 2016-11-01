@@ -25,9 +25,11 @@ import java.util.*;
  * Tools-TestRESTService and set the appropriate HTTP method, host/port, path and request body and then press
  * the green arrow (submit request).
  *
+ * See the readme.txt for instructions on how to deploy this application as a webservice.
+ *
  * @author kvlinden
  * @version summer, 2015 - original version
- * @version summer, 2016 - upgraded to JSON; added Player POJO; removed unneeded libraries
+ * @version summer, 2016 - upgraded to GSON/JSON; added Player POJO; removed unneeded libraries
  */
 @Path("/monopoly")
 public class MonopolyResource {

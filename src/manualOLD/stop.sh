@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# source env.sh
-source env.sh
+# Environment variables
+NAME=Lab09
+DIR=/var/cs262/$NAME/src/
+PID=$DIR/$USER-$NAME.pid
 
 # Write our PID file
 /usr/bin/pkill -P `cat $DIR/$USER-$NAME.pid`

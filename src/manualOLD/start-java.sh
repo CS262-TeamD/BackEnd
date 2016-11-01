@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# source the env.sh file
-source env.sh
+# Environment variables
+NAME=Lab09
+DIR=/var/cs262/$NAME/src/
+PID=$DIR/$USER-$NAME.pid
 
 # Write our PID file
 echo $$ > $DIR/$USER-$NAME.pid
