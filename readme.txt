@@ -29,7 +29,7 @@ This application will run on cs262.cs.calvin.edu, which is configured to run you
   This will start your service on the machine. It will run until you execute the stop.sh script.
   Note: a single user can only run one instance of this startup script with the same Name.
 
-When configured an running, your webservice should respond to URLs similar to the active one you used in homework 2:
+When configured and running, your webservice should respond to URLs similar to the active one you used in homework 2:
 
     http://cs262.cs.calvin.edu:8089/monopoly/players
         ...set the port and path appropriately...
