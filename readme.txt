@@ -11,16 +11,17 @@ This application will run on cs262.cs.calvin.edu, which is configured to run you
          ...try out some SQL queries here...
     postgres% exit
 
-- To configure and run this application as a RESTful web service do the following. See the sample scripts in Lab09/src/manual/.
-    1. Load your (full) webservice application into /var/cs262/. (use a unique name)
-    2. Edit your application to use the appropriate port for your team:
-        A - 8081
-        B - 8082
-        C - 8083
-        D - 8084
-        E - 8085
-        F - 8086
-        G - 8087
+- To configure and run this application as a RESTful web service do the following.
+    1. Load your (full) webservice application into /var/cs262/PROJECT_NAME. (use a unique name, e.g., cs262aFitness)
+    2. Edit your application (see MainResource#main()) to use the appropriate DB_URI and PORT for your team.
+       The PORT for each team is:
+            A - 8081
+            B - 8082
+            C - 8083
+            D - 8084
+            E - 8085
+            F - 8086
+            G - 8087
     3. Copy the sample scripts from the Lab09 repo (Lab09/src/manual/*) into your application and edit them as follows.
         a. env.sh - Set a unique name and path.
         b. start-java.sh - Edit the commands at the bottom to compile and run your application.
