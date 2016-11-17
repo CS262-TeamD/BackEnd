@@ -44,7 +44,7 @@ public class MonopolyResource {
     @Path("/hello")
     @Produces("text/plain")
     public String getClichedMessage() {
-        return "Hello, Jersey!";
+        return "Hello, Cleaning Crew!";
     }
 
     /**
@@ -161,10 +161,10 @@ public class MonopolyResource {
     /**
      * Constants for a local Postgresql server with the monopoly database
      */
-    private static final String DB_URI = "jdbc:postgresql://localhost:5432/monopoly";
-    private static final String DB_LOGIN_ID = "postgres";
-    private static final String DB_PASSWORD = "bjarne";
-    private static final String PORT = "8089";
+    private static final String DB_URI = "jdbc:postgresql://cs262.cs.calvin.edu:8084/monopoly";
+    private static final String DB_LOGIN_ID = "cs262dCleaningCrew";
+    private static final String DB_PASSWORD = "Listen-Anywhere-6";
+    private static final String PORT = "8084";
 
     /*
      * Utility method that does the database query, potentially throwing an SQLException,
@@ -206,7 +206,7 @@ public class MonopolyResource {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             statement = connection.createStatement();
-            rs = statement.executeQuery("SELECT * FROM Player");
+            rs = statement.executeQuery("SELECT * FROM Task");
             while (rs.next()) {
                 players.add(new Player(rs.getInt(1), rs.getString(2), rs.getString(3)));
             }
