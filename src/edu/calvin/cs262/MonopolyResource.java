@@ -31,7 +31,7 @@ import java.util.*;
  * @version summer, 2015 - original version
  * @version summer, 2016 - upgraded to GSON/JSON; added Player POJO; removed unneeded libraries
  */
-@Path("/monopoly")
+@Path("/")
 public class MonopolyResource {
 
     /**
