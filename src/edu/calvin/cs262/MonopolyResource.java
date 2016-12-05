@@ -31,7 +31,7 @@ import java.util.*;
  * @version summer, 2015 - original version
  * @version summer, 2016 - upgraded to GSON/JSON; added Player POJO; removed unneeded libraries
  */
-@Path("/")
+@Path("/cs262dCleaningCrew/")
 public class MonopolyResource {
 
     /**
@@ -54,9 +54,9 @@ public class MonopolyResource {
      * @return a JSON version of the player record, if any, with the given id
      */
     @GET
-    @Path("/player/{id}")
+    @Path("/task/{id}")
     @Produces("application/json")
-    public String getPlayer(@PathParam("id") int id) {
+    public String getTask(@PathParam("id") int id) {
         try {
             return new Gson().toJson(retrievePlayer(id));
         } catch (Exception e) {
@@ -71,9 +71,9 @@ public class MonopolyResource {
      * @return a JSON list representation of the player records
      */
     @GET
-    @Path("/players")
+    @Path("/tasks")
     @Produces("application/json")
-    public String getPlayers() {
+    public String getTasks() {
         try {
             return new Gson().toJson(retrievePlayers());
         } catch (Exception e) {
@@ -161,7 +161,7 @@ public class MonopolyResource {
     /**
      * Constants for a local Postgresql server with the monopoly database
      */
-    private static final String DB_URI = "jdbc:postgresql://cs262.cs.calvin.edu:8084/monopoly";
+    private static final String DB_URI = "jdbc:postgresql://cs262.cs.calvin.edu:8084/cs262dCleaningCrew";
     private static final String DB_LOGIN_ID = "cs262dCleaningCrew";
     private static final String DB_PASSWORD = "Listen-Anywhere-6";
     private static final String PORT = "8084";
@@ -179,9 +179,9 @@ public class MonopolyResource {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             statement = connection.createStatement();
-            rs = statement.executeQuery("SELECT * FROM Player WHERE id=" + id);
+            rs = statement.executeQuery("SELECT * FROM task WHERE id=" + id);
             if (rs.next()) {
-                player = new Player(rs.getInt(1), rs.getString(2), rs.getString(3));
+                task = new Task(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getBoolean(4));
             }
         } catch (SQLException e) {
             throw (e);
@@ -190,7 +190,7 @@ public class MonopolyResource {
             statement.close();
             connection.close();
         }
-        return player;
+        return task;
     }
 
     /*
