@@ -9,7 +9,7 @@ package edu.calvin.cs262;
 public class Person {
 
     private int id;
-    private String name, email, phonenumber, role;
+    private String name, emailaddress, phonenumber, role;
 
     Person() { /* a default constructor, required by Gson */  }
 

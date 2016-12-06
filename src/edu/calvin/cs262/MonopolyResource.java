@@ -58,7 +58,7 @@ public class MonopolyResource {
     @Produces("application/json")
     public String getTask(@PathParam("id") int id) {
         try {
-            return new Gson().toJson(retrievePlayer(id));
+            return new Gson().toJson(retrieveTask(id));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,7 +75,7 @@ public class MonopolyResource {
     @Produces("application/json")
     public String getTasks() {
         try {
-            return new Gson().toJson(retrievePlayers());
+            return new Gson().toJson(retrieveTasks());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -162,19 +162,24 @@ public class MonopolyResource {
      * Constants for a local Postgresql server with the monopoly database
      */
     private static final String DB_URI = "jdbc:postgresql://cs262.cs.calvin.edu:8084/cs262dCleaningCrew";
-    private static final String DB_LOGIN_ID = "cs262dCleaningCrew";
-    private static final String DB_PASSWORD = "Listen-Anywhere-6";
+    private static final String DB_LOGIN_ID = "postgres";
+    private static final String DB_PASSWORD = "postgres";
     private static final String PORT = "8084";
+
+//    private static final String DB_URI = "jdbc:postgresql://localhost:5432/cs262dCleaningCrew";
+//    private static final String DB_LOGIN_ID = "postgres";
+//    private static final String DB_PASSWORD = "postgres";
+//    private static final String PORT = "9998";
 
     /*
      * Utility method that does the database query, potentially throwing an SQLException,
      * returning a player object (or null).
      */
-    private Player retrievePlayer(int id) throws Exception {
+    private Task retrieveTask(int id) throws Exception {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
-        Player player = null;
+        Task task = null;
         try {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
@@ -197,18 +202,18 @@ public class MonopolyResource {
     * Utility method that does the database query, potentially throwing an SQLException,
     * returning a list of name-value map objects (potentially empty).
     */
-    private List<Player> retrievePlayers() throws Exception {
+    private List<Task> retrieveTasks() throws Exception {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
-        List<Player> players = new ArrayList<>();
+        List<Task> tasks = new ArrayList<>();
         try {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             statement = connection.createStatement();
             rs = statement.executeQuery("SELECT * FROM Task");
             while (rs.next()) {
-                players.add(new Player(rs.getInt(1), rs.getString(2), rs.getString(3)));
+                tasks.add(new Task(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getBoolean(4)));
             }
         } catch (SQLException e) {
             throw (e);
@@ -217,7 +222,7 @@ public class MonopolyResource {
             statement.close();
             connection.close();
         }
-        return players;
+        return tasks;
     }
 
     /*
