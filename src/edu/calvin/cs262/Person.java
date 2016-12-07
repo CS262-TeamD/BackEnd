@@ -8,12 +8,11 @@ package edu.calvin.cs262;
  */
 public class Person {
 
-    private int id;
-    private String name, emailaddress, phonenumber, role;
+    private String id, name, emailaddress, phonenumber, role;
 
     Person() { /* a default constructor, required by Gson */  }
 
-    Person(int id, String emailaddress, String name, String phonenumber,
+    Person(String id, String emailaddress, String name, String phonenumber,
            String role) {
         this.id = id;
         this.emailaddress = emailaddress;
@@ -22,7 +21,7 @@ public class Person {
         this.role = role;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
     public String getEmailaddress() {
@@ -34,7 +33,7 @@ public class Person {
     public String getPhonenumber() { return phonenumber; }
     public String getRole() { return role; }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
     public void setEmailaddress(String emailaddress) {
