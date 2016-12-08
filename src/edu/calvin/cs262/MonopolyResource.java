@@ -16,6 +16,13 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
+import Person.java;
+import Assignment.java;
+import Player.java;
+import Task.java;
+import Building.java;
+import Room.java;
+import Player.java;
 /**
  * This module implements a RESTful service for the player table of the monopoly database.
  * Only the player relation is supported, not the game or playergame objects.

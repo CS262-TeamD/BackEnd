@@ -5,6 +5,8 @@ source env.sh
 
 # Write our PID file
 echo $$ > $DIR/$USER-$NAME.pid
+echo `which java`
+echo `which javac`
 
 # Change to our working directory
 cd $DIR
