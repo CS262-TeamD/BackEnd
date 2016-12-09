@@ -16,13 +16,6 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
-import Person.java;
-import Assignment.java;
-import Player.java;
-import Task.java;
-import Building.java;
-import Room.java;
-import Player.java;
 /**
  * This module implements a RESTful service for the player table of the monopoly database.
  * Only the player relation is supported, not the game or playergame objects.
@@ -90,22 +83,22 @@ public class MonopolyResource {
         return null;
     }
 
-//    /**
-//     * GET method that returns a list of all monopoly players
-//     *
-//     * @return a JSON list representation of the player records
-//     */
-//    @GET
-//    @Path("/tasks")
-//    @Produces("application/json")
-//    public String getTasks() {
-//        try {
-//            return new Gson().toJson(retrieveTasks());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+    /**
+     * GET method that returns a list of all monopoly players
+     *
+     * @return a JSON list representation of the player records
+     */
+    @GET
+    @Path("/tasks")
+    @Produces("application/json")
+    public String getTask() {
+        try {
+            return new Gson().toJson(retrieveTasks());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 //    /**
 //     * PUT method for creating an instance of Person with a given ID - If the
@@ -148,69 +141,69 @@ public class MonopolyResource {
         return null;
     }
 
-//    /**
-//     * POST method for creating an instance of Person with a new, unique ID
-//     * number. We do this because POST is not idempotent, meaning that running
-//     * the same POST several times creates multiple objects with unique IDs but
-//     * otherwise having the same field values.
-//     * <p>
-//     * The method creates a new, unique ID by querying the player table for the
-//     * largest ID and adding 1 to that. Using a DB sequence would be a better solution.
-//     *
-//     * @param playerLine a JSON representation of the player (ID ignored)
-//     * @return a JSON representation of the new player
-//     */
-//    @POST
-//    @Path("/player")
-//    @Consumes("application/json")
-//    @Produces("application/json")
-//    public String postPlayer(String playerLine) {
-//        try {
-//            Player player = new Gson().fromJson(playerLine, Player.class);
-//            return new Gson().toJson(addNewPlayer(player));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+    /**
+     * POST method for creating an instance of Person with a new, unique ID
+     * number. We do this because POST is not idempotent, meaning that running
+     * the same POST several times creates multiple objects with unique IDs but
+     * otherwise having the same field values.
+     * <p>
+     * The method creates a new, unique ID by querying the player table for the
+     * largest ID and adding 1 to that. Using a DB sequence would be a better solution.
+     *
+     * @param taskLine a JSON representation of the player (ID ignored)
+     * @return a JSON representation of the new player
+     */
+    @POST
+    @Path("/task")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public String postTask(String taskLine) {
+        try {
+            Task task = new Gson().fromJson(taskLine, Task.class);
+            return new Gson().toJson(addNewTask(task));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-//    /**
-//     * DELETE method for deleting and instance of player with the given ID. If
-//     * the player doesn't exist, then don't delete anything. DELETE is idempotent, so
-//     * the result of sending the same command multiple times should be the same as
-//     * sending it exactly once.
-//     *
-//     * @param id the ID of the player to be deleted
-//     * @return null
-//     */
-//    @DELETE
-//    @Path("/player/{id}")
-//    @Produces("application/json")
-//    public String deletePlayer(@PathParam("id") int id) {
-//        try {
-//            Player x = new Player(id, "deleted", "deleted");
-//            Player y = deletePlayer(x);
-//            return new Gson().toJson(y);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+    /**
+     * DELETE method for deleting and instance of player with the given ID. If
+     * the player doesn't exist, then don't delete anything. DELETE is idempotent, so
+     * the result of sending the same command multiple times should be the same as
+     * sending it exactly once.
+     *
+     * @param id the ID of the player to be deleted
+     * @return null
+     */
+    @DELETE
+    @Path("/task/{id}")
+    @Produces("application/json")
+    public String deleteTask(@PathParam("id") int id) {
+        try {
+            Task x = new Task(id, 0, "deleted", false);
+            Task y = deleteTask(x);
+            return new Gson().toJson(y);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     /** DBMS Utility Functions *********************************************/
 
     /**
      * Constants for a local Postgresql server with the monopoly database
      */
-    private static final String DB_URI = "jdbc:postgresql://cs262.cs.calvin.edu:8084/cs262dCleaningCrew";
-    private static final String DB_LOGIN_ID = "postgres";
-    private static final String DB_PASSWORD = "postgres";
-    private static final String PORT = "8084";
-
-//    private static final String DB_URI = "jdbc:postgresql://localhost:5432/cs262dCleaningCrew";
+//    private static final String DB_URI = "jdbc:postgresql://cs262.cs.calvin.edu:8084/cs262dCleaningCrew";
 //    private static final String DB_LOGIN_ID = "postgres";
 //    private static final String DB_PASSWORD = "postgres";
-//    private static final String PORT = "9998";
+//    private static final String PORT = "8084";
+
+    private static final String DB_URI = "jdbc:postgresql://localhost:5432/cs262dCleaningCrew";
+    private static final String DB_LOGIN_ID = "postgres";
+    private static final String DB_PASSWORD = "postgres";
+    private static final String PORT = "9998";
 
     /*
      * Utility method that does the database query, potentially throwing an SQLException,
@@ -225,7 +218,7 @@ public class MonopolyResource {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             statement = connection.createStatement();
-            rs = statement.executeQuery("SELECT * FROM task, Assignment WHERE Task.id=Assignment.taskID AND Assignment.personID='" + id + "';");
+            rs = statement.executeQuery("SELECT Task.id, description, isComplete,  FROM Task, Assignment, Room, Building WHERE Task.id=Assignment.taskID AND Assignment.personID='" + id + "' ORDER BY Task.id;");
             while (rs.next()) {
                 tasks.add(new Task(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getBoolean(4)));
             }
@@ -266,32 +259,34 @@ public class MonopolyResource {
         return persons;
     }
 
-//    /*
-//    * Utility method that does the database query, potentially throwing an SQLException,
-//    * returning a list of name-value map objects (potentially empty).
-//    */
-//    private List<Task> retrieveTasks() throws Exception {
-//        Connection connection = null;
-//        Statement statement = null;
-//        ResultSet rs = null;
-//        List<Task> tasks = new ArrayList<>();
-//        try {
-//            Class.forName("org.postgresql.Driver");
-//            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
-//            statement = connection.createStatement();
-//            rs = statement.executeQuery("SELECT * FROM Task");
-//            while (rs.next()) {
-//                tasks.add(new Task(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getBoolean(4)));
-//            }
-//        } catch (SQLException e) {
-//            throw (e);
-//        } finally {
-//            rs.close();
-//            statement.close();
-//            connection.close();
-//        }
-//        return tasks;
-//    }
+
+
+    /*
+    * Utility method that does the database query, potentially throwing an SQLException,
+    * returning a list of name-value map objects (potentially empty).
+    */
+    private List<Task> retrieveTasks() throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        List<Task> tasks = new ArrayList<>();
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            rs = statement.executeQuery("SELECT * FROM Task ORDER BY Task.id;");
+            while (rs.next()) {
+                tasks.add(new Task(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getBoolean(4)));
+            }
+        } catch (SQLException e) {
+            throw (e);
+        } finally {
+            rs.close();
+            statement.close();
+            connection.close();
+        }
+        return tasks;
+    }
 
     private Task setTaskComplete(Task task) {
         Connection connection = null;
@@ -318,6 +313,56 @@ public class MonopolyResource {
         return null;
     }
 
+    /*
+    * Utility method that adds the given player using a new,unique ID, potentially throwing an SQLException,
+    * returning the new player
+    */
+    private Task addNewTask(Task task) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            rs = statement.executeQuery("SELECT MAX(id) FROM Task");
+            if (rs.next()) {
+                task.setId(rs.getInt(1) + 1);
+            } else {
+                throw new RuntimeException("failed to find unique ID...");
+            }
+            statement.executeUpdate("INSERT INTO Task VALUES (" + task.getId() + ", '" + task.getRoomID() + "', '"
+                    + task.getDescription() + "', '" + task.getIsComplete() + "')");
+        } catch (SQLException e) {
+            throw (e);
+        } finally {
+            rs.close();
+            statement.close();
+            connection.close();
+        }
+        return task;
+    }
+
+    /*
+    * Utility method that does the database update, potentially throwing an SQLException,
+    * returning the player, potentially new.
+    */
+    public Task deleteTask(Task task) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            statement.executeUpdate("DELETE FROM Task WHERE id=" + task.getId());
+        } catch (SQLException e) {
+            throw (e);
+        } finally {
+            statement.close();
+            connection.close();
+        }
+        return task;
+    }
 
     /** Main *****************************************************/
 
