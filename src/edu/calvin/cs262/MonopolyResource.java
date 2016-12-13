@@ -209,18 +209,18 @@ public class MonopolyResource {
      * Utility method that does the database query, potentially throwing an SQLException,
      * returning a player object (or null).
      */
-    private List<Task> retrieveTasks(String id) throws Exception {
+    private List<MainTask> retrieveTasks(String id) throws Exception {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
-        List<Task> tasks = new ArrayList<>();
+        List<MainTask> tasks = new ArrayList<>();
         try {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             statement = connection.createStatement();
-            rs = statement.executeQuery("SELECT Task.id, description, isComplete, roomnumber, Building.name FROM Task, Assignment, Room, Building WHERE Task.id=Assignment.taskID AND Assignment.personID='" + id + "' AND Task.roomID = Room.id AND Room.buildingID = Building.ID ORDER BY Task.id;");
+            rs = statement.executeQuery("SELECT Task.id, description, roomnumber, Building.name, isComplete FROM Task, Assignment, Room, Building WHERE Task.id=Assignment.taskID AND Assignment.personID='" + id + "' AND Task.roomID = Room.id AND Room.buildingID = Building.ID ORDER BY Task.id;");
             while (rs.next()) {
-                tasks.add(new Task(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getBoolean(4)));
+                tasks.add(new MainTask(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4), rs.getBoolean(5)));
             }
         } catch (SQLException e) {
             e.printStackTrace();
