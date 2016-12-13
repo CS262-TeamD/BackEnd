@@ -16,13 +16,6 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
-import Person.java;
-import Assignment.java;
-import Player.java;
-import Task.java;
-import Building.java;
-import Room.java;
-import Player.java;
 /**
  * This module implements a RESTful service for the player table of the monopoly database.
  * Only the player relation is supported, not the game or playergame objects.
@@ -140,7 +133,7 @@ public class MonopolyResource {
         try {
             Task task = new Gson().fromJson(taskLine, Task.class);
             task.setId(id);
-            System.out.println("put");
+            //System.out.println("put");
             return new Gson().toJson(setTaskComplete(task));
         } catch (Exception e) {
             e.printStackTrace();
@@ -202,15 +195,15 @@ public class MonopolyResource {
     /**
      * Constants for a local Postgresql server with the monopoly database
      */
-    private static final String DB_URI = "jdbc:postgresql://cs262.cs.calvin.edu:8084/cs262dCleaningCrew";
+    //private static final String DB_URI = "jdbc:postgresql://cs262.cs.calvin.edu:5432/cs262dCleaningCrew";
     private static final String DB_LOGIN_ID = "postgres";
-    private static final String DB_PASSWORD = "postgres";
+    private static final String DB_PASSWORD = "Listen-Anywhere-6";
     private static final String PORT = "8084";
 
-//    private static final String DB_URI = "jdbc:postgresql://localhost:5432/cs262dCleaningCrew";
-//    private static final String DB_LOGIN_ID = "postgres";
-//    private static final String DB_PASSWORD = "postgres";
-//    private static final String PORT = "9998";
+    private static final String DB_URI = "jdbc:postgresql://localhost:5432/cs262dCleaningCrew";
+    //private static final String DB_LOGIN_ID = "postgres";
+    //private static final String DB_PASSWORD = "postgres";
+    //private static final String PORT = "8084";
 
     /*
      * Utility method that does the database query, potentially throwing an SQLException,
@@ -230,6 +223,7 @@ public class MonopolyResource {
                 tasks.add(new Task(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getBoolean(4)));
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw (e);
         } finally {
             rs.close();
