@@ -218,7 +218,7 @@ public class MonopolyResource {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
             statement = connection.createStatement();
-            rs = statement.executeQuery(SELECT Task.id, description, isComplete, roomnumber, Building.name FROM Task, Assignment, Room, Building WHERE Task.id=Assignment.taskID AND Assignment.personID='" + id + "' AND Task.roomID = Room.id AND Room.buildingID = Building.ID ORDER BY Task.id;");
+            rs = statement.executeQuery("SELECT Task.id, description, isComplete, roomnumber, Building.name FROM Task, Assignment, Room, Building WHERE Task.id=Assignment.taskID AND Assignment.personID='" + id + "' AND Task.roomID = Room.id AND Room.buildingID = Building.ID ORDER BY Task.id;");
             while (rs.next()) {
                 tasks.add(new Task(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getBoolean(4)));
             }
