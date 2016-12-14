@@ -9,17 +9,18 @@ package edu.calvin.cs262;
 public class MainTask {
 
     private int id, roomNumber;
-    private String description, buildingName;
+    private String description, buildingName, comment;
     private boolean isComplete;
 
     MainTask() { /* a default constructor, required by Gson */  }
 
-    MainTask(int id, String description, int roomNumber, String buildingName, boolean isComplete) {
+    MainTask(int id, String description, int roomNumber, String buildingName, String comment, boolean isComplete) {
         this.id = id;
         this.description = description;
         this.roomNumber = roomNumber;
         this.buildingName = buildingName;
         this.isComplete = isComplete;
+        this.comment = comment;
     }
 
     public int getId() {
@@ -33,7 +34,8 @@ public class MainTask {
     }
     public String getBuildingName() { return buildingName; }
     public boolean getIsComplete() { return isComplete; }
-
+    public String getComment() { return comment; }
+    
     public void setId(int id) {
         this.id = id;
     }
@@ -45,6 +47,7 @@ public class MainTask {
     }
     public void setBuildingName(String buildingName) { this.buildingName = buildingName; }
     public void setIsComplete(boolean isComplete) { this.isComplete = isComplete; }
+    public void setComment(String comment) { this.comment = comment; }
 
 
 }
