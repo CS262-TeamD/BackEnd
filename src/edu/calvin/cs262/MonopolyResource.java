@@ -1,6 +1,8 @@
 package edu.calvin.cs262;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.jersey.server.impl.model.parameter.multivalued.ExtractorContainerException;
 import com.sun.net.httpserver.HttpServer;
@@ -16,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import java.io.Console;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.sql.*;
 import java.util.*;
 
@@ -161,6 +164,24 @@ public class MonopolyResource {
         return null;
     }
 
+    @PUT
+    @Path("/comment")
+    @Consumes("application/json")
+    @Produces("text/plain")
+    public String putComment(String commentLine) {
+        try {
+            MainTask comment = new Gson().fromJson(commentLine, MainTask.class);
+            //System.out.println("put");
+            updateComment(comment);
+            //System.out.print(person.toString());
+            return commentLine.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
     /**
      * POST method for creating an instance of Person with a new, unique ID
      * number. We do this because POST is not idempotent, meaning that running
@@ -221,7 +242,7 @@ public class MonopolyResource {
     private static final String PORT = "8084";
 
     private static final String DB_URI = "jdbc:postgresql://localhost:5432/cs262dCleaningCrew";
-    //private static final String DB_LOGIN_ID = "postgres";
+//    private static final String DB_LOGIN_ID = "postgres";
 //    private static final String DB_PASSWORD = "postgres";
     //private static final String PORT = "8084";
 
@@ -406,6 +427,58 @@ public class MonopolyResource {
             }
         }
         return null;
+    }
+
+//    private MainTask updateComment(MainTask task) {
+//        Connection connection = null;
+//        Statement statement = null;
+//        String new_comment = task.getComment();
+//        try {
+//            Class.forName("org.postgresql.Driver");
+//            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+//            statement = connection.createStatement();
+//            System.out.print("got here");
+//            statement.executeUpdate("UPDATE Assignment SET comment='" + new_comment
+//                    + "' WHERE Task.id=" + task.getId() + ";");
+//            task.setComment(new_comment);
+//            return task;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            try {
+//                statement.close();
+//                connection.close();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return null;
+//    }
+    public void updateComment(MainTask comment) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet rs = null;
+        Assignment assignment = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            rs = statement.executeQuery("SELECT Assignment.id, taskid, personid, comment, completetime FROM Task, Assignment WHERE Task.id=" + comment.getId() + ";");
+            while (rs.next()) {
+                assignment = new Assignment(rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getString(4), rs.getTimestamp(5));
+            }
+            statement.executeUpdate("UPDATE Assignment SET comment='" + comment.getComment()
+                    + "' WHERE Assignment.id=" + comment.getId() + ";");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /** Main *****************************************************/
