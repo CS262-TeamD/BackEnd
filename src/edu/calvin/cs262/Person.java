@@ -12,7 +12,7 @@ public class Person {
 
     Person() { /* a default constructor, required by Gson */  }
 
-    Person(String id, String emailaddress, String name, String phonenumber,
+    Person(String id, String name, String emailaddress, String phonenumber,
            String role) {
         this.id = id;
         this.emailaddress = emailaddress;

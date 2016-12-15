@@ -2,7 +2,9 @@ package edu.calvin.cs262;
 
 import com.google.gson.Gson;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
+import com.sun.jersey.server.impl.model.parameter.multivalued.ExtractorContainerException;
 import com.sun.net.httpserver.HttpServer;
+import sun.rmi.runtime.Log;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -12,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
+import java.io.Console;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
@@ -141,6 +144,23 @@ public class MonopolyResource {
         return null;
     }
 
+    @PUT
+    @Path("/info")
+    @Consumes("application/json")
+    @Produces("text/plain")
+    public String putContactInfo(String personLine) {
+        try {
+            Person person = new Gson().fromJson(personLine, Person.class);
+            //System.out.println("put");
+            updatePerson(person);
+            //System.out.print(person.toString());
+            return "Information for " + person.getPhonenumber() + " Updated";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /**
      * POST method for creating an instance of Person with a new, unique ID
      * number. We do this because POST is not idempotent, meaning that running
@@ -202,7 +222,7 @@ public class MonopolyResource {
 
     private static final String DB_URI = "jdbc:postgresql://localhost:5432/cs262dCleaningCrew";
     //private static final String DB_LOGIN_ID = "postgres";
-    //private static final String DB_PASSWORD = "postgres";
+//    private static final String DB_PASSWORD = "postgres";
     //private static final String PORT = "8084";
 
     /*
@@ -363,6 +383,29 @@ public class MonopolyResource {
             connection.close();
         }
         return task;
+    }
+
+    public Person updatePerson(Person person) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            Class.forName("org.postgresql.Driver");
+            connection = DriverManager.getConnection(DB_URI, DB_LOGIN_ID, DB_PASSWORD);
+            statement = connection.createStatement();
+            statement.executeUpdate("UPDATE Person SET phonenumber='" + person.getPhonenumber() + "', email='"
+                    + person.getEmailaddress() + "' WHERE Person.id='" + person.getId() + "';");
+            return person;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                statement.close();
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     /** Main *****************************************************/
