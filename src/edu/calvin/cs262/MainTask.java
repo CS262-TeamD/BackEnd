@@ -3,6 +3,7 @@ package edu.calvin.cs262;
 /**
  * A Task class (POJO) for the Task relation
  * Represents the Task table for CS262dCleaningCrew
+ * MainTask also adds comments to the Task relation
  *
  * @author rga6
  */

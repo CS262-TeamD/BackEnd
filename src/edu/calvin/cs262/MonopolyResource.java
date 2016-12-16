@@ -23,19 +23,13 @@ import java.sql.*;
 import java.util.*;
 
 /**
- * This module implements a RESTful service for the player table of the monopoly database.
- * Only the player relation is supported, not the game or playergame objects.
+ * This module implements a RESTful service for the cs262dCleaningCrew.
+ * This server implements classes for each relation in the database.
  * The server requires Java 1.7 (not 1.8).
  *
- * I tested these services using IDEA's REST Client test tool. Run the server and open
- * Tools-TestRESTService and set the appropriate HTTP method, host/port, path and request body and then press
- * the green arrow (submit request).
- *
- * See the readme.txt for instructions on how to deploy this application as a webservice.
- *
- * @author kvlinden
+ * @author kvlinden, peteroostema
  * @version summer, 2015 - original version
- * @version summer, 2016 - upgraded to GSON/JSON; added Player POJO; removed unneeded libraries
+ * @version December, 2016 - altered code to work with cs262 Team D's DB
  */
 @Path("/cs262dCleaningCrew/")
 public class MonopolyResource {
@@ -54,10 +48,10 @@ public class MonopolyResource {
     }
 
     /**
-     * GET method that returns a particular monopoly player based on ID
+     * GET method that returns the tasks for a particular user id
      *
-     * @param id a player id in the monopoly database
-     * @return a JSON version of the player record, if any, with the given id
+     * @param id an employee id in the CleaningCrew database
+     * @return a JSON version of the task record, if any, with the given id
      */
     @GET
     @Path("/task/{id}")
@@ -72,10 +66,12 @@ public class MonopolyResource {
     }
 
     /**
-     * GET method that returns a particular monopoly player based on ID
+     * GET method that returns a information about the other users in the 
+     *  CleaningCrew database
      *
-     * @param id a player id in the monopoly database
-     * @return a JSON version of the player record, if any, with the given id
+     * @param id a user id in the CleaningCrew database
+     * @return a JSON version of the users in the database minus the current
+     *   user.
      */
     @GET
     @Path("/contact/{id}")
@@ -90,9 +86,9 @@ public class MonopolyResource {
     }
 
     /**
-     * GET method that returns a list of all monopoly players
+     * GET method that returns a list of all tasks in the system
      *
-     * @return a JSON list representation of the player records
+     * @return a JSON list representation of the task records
      */
     @GET
     @Path("/tasks")
@@ -131,6 +127,16 @@ public class MonopolyResource {
 //        return null;
 //    }
 
+    /**
+     * PUT method for creating an instance of Task with a given ID - If the
+     * task already exists, update the fields using the new task fields
+     * because PUT is idempotent, meaning that running the same PUT several
+     * times is the same as running it exactly once.
+     *
+     * @param id         the ID for the new task, assumed to be unique
+     * @param taskLine a JSON representation of a task; the id paramete$
+     * @return JSON representation of the updated taskr, or NULL for errors
+     */
     @PUT
     @Path("/task/{id}")
     @Consumes("application/json")
@@ -147,6 +153,16 @@ public class MonopolyResource {
         return null;
     }
 
+    /**
+     * PUT method for creating an instance of Contact with a given ID - If the
+     * contact already exists, update the fields using the new contact field va$
+     * because PUT is idempotent, meaning that running the same PUT several
+     * times is the same as running it exactly once.
+     *
+     * @param id         the ID for the new contact, assumed to be unique
+     * @param personLine a JSON representation of the contact; the id paramete$
+     * @return JSON representation of the updated contact, or NULL for errors
+     */
     @PUT
     @Path("/info")
     @Consumes("application/json")
@@ -164,6 +180,13 @@ public class MonopolyResource {
         return null;
     }
 
+    /**
+     * PUT method for changing the comment in a task record
+     *
+     * @param id         the ID for the task to be edited, assumed to be unique
+     * @param commentLine a JSON representation of a task; the id paramete$
+     * @return JSON representation of the updated task, or NULL for errors
+     */
     @PUT
     @Path("/comment")
     @Consumes("application/json")
@@ -188,11 +211,11 @@ public class MonopolyResource {
      * the same POST several times creates multiple objects with unique IDs but
      * otherwise having the same field values.
      * <p>
-     * The method creates a new, unique ID by querying the player table for the
+     * The method creates a new, unique ID by querying the task table for the
      * largest ID and adding 1 to that. Using a DB sequence would be a better solution.
      *
-     * @param taskLine a JSON representation of the player (ID ignored)
-     * @return a JSON representation of the new player
+     * @param taskLine a JSON representation of the task (ID ignored)
+     * @return a JSON representation of the new task
      */
     @POST
     @Path("/task")
@@ -214,7 +237,7 @@ public class MonopolyResource {
      * the result of sending the same command multiple times should be the same as
      * sending it exactly once.
      *
-     * @param id the ID of the player to be deleted
+     * @param id the ID of the task to be deleted
      * @return null
      */
     @DELETE
@@ -248,7 +271,7 @@ public class MonopolyResource {
 
     /*
      * Utility method that does the database query, potentially throwing an SQLException,
-     * returning a player object (or null).
+     * returning  task objects (or null).
      */
     private List<MainTask> retrieveTasks(String id) throws Exception {
         Connection connection = null;
@@ -276,7 +299,7 @@ public class MonopolyResource {
 
     /*
      * Utility method that does the database query, potentially throwing an SQLException,
-     * returning a player object (or null).
+     * returning a task object (or null).
      */
     private List<Person> retrieveContacts(String id) throws Exception {
         Connection connection = null;
@@ -356,8 +379,8 @@ public class MonopolyResource {
     }
 
     /*
-    * Utility method that adds the given player using a new,unique ID, potentially throwing an SQLException,
-    * returning the new player
+    * Utility method that adds the given task using a new,unique ID, potentially throwing an SQLException,
+    * returning the new task
     */
     private Task addNewTask(Task task) throws Exception {
         Connection connection = null;
@@ -387,7 +410,7 @@ public class MonopolyResource {
 
     /*
     * Utility method that does the database update, potentially throwing an SQLException,
-    * returning the player, potentially new.
+    * returning the task, newly deleted
     */
     public Task deleteTask(Task task) throws Exception {
         Connection connection = null;
